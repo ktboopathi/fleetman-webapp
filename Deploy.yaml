@@ -14,6 +14,11 @@
         name: http-server
         description: Security rules for HTTP Server
         region: "{{ region }}"
+        rules_egress:
+           - proto: tcp
+             from_port: 0
+             to_port: 65535
+             cidr_ip: 0.0.0.0/0
         rules:
            - proto: tcp
              from_port: 8080
@@ -58,42 +63,6 @@
     yum: name=* state=latest
     become: true
   
-  - name: Ensure git is installed
-    yum: name=git state=latest
-    become: true
-
-  - name: Checkout Webserver Project
-    git:
-       repo: https://github.com/VPPCourse/fleetman-webapp
-       dest: /home/ec2-user/webapp/
-       version: master
-
-  - name: Prepare Maven Directory
-    file:
-       path: /opt
-       state: directory
-    become: true
-
-  - name: Download Maven
-    get_url:
-       url: https://www.apache.org/dist/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
-       dest: /opt/maven3.tar.gz
-    become: true
-
-  - name: Unpack Maven
-    unarchive:
-       remote_src: yes
-       src: /opt/maven3.tar.gz
-       dest: /opt/
-    become: true
-
-  - name: Set Mvn command
-    alternatives:
-       name: mvn
-       path: /opt/apache-maven-3.3.9/bin/mvn
-       link: /usr/bin/mvn
-    become: true
-
   - name: Install JDK
     yum:
        name: java-1.8.0-openjdk-devel
@@ -107,11 +76,10 @@
        link: /usr/bin/java
     become: true
 
-  - name: Build the Webapp
-    command: mvn -DskipTests package
-    args:
-            chdir: webapp/
-            creates: /home/ec2-user/webapp/target/fleetman-0.0.1-SNAPSHOT.war
+  - name: Send the deployment across to the new instance
+    copy: 
+       src: target/fleetman-0.0.1-SNAPSHOT.war
+       dest: /home/ec2-user/webapp/target/
 
   - name: Build a link to the executable so it becomes a service
     file:
@@ -132,4 +100,3 @@
             host: localhost
             port: 8080
             state: started
-
