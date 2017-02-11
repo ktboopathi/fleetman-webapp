@@ -11,8 +11,4 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @WebAppConfiguration
 public class FleetmanApplicationTests {
 
-	@Test
-	public void contextLoads() {
-	}
-
 }
