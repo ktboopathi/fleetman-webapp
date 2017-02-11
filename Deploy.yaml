@@ -1,0 +1,135 @@
+#  Provisions a new Webserver
+
+- hosts: localhost
+  gather_facts: no
+  vars: 
+     region: eu-west-1
+     keypair_name: microservice-course-keypair
+     instance_type: t2.nano
+     image_name: ami-70edb016
+  
+  tasks:
+    - name: Setup security group
+      ec2_group:
+        name: http-server
+        description: Security rules for HTTP Server
+        region: "{{ region }}"
+        rules:
+           - proto: tcp
+             from_port: 8080
+             to_port: 8080
+             cidr_ip: 0.0.0.0/0
+           
+           - proto: tcp
+             from_port: 22
+             to_port: 22
+             cidr_ip: 0.0.0.0/0
+
+    - name: Provision an instance
+      ec2:
+        key_name: "{{ keypair_name }}"
+        group: http-server
+        instance_type: "{{ instance_type }}"
+        image: "{{ image_name }}"
+        wait: true
+        region: "{{region}}"
+        exact_count: 1 
+        count_tag:
+          Deploy: New
+        instance_tags:
+          Name: Webserver
+          Deploy: New
+      register: ec2
+
+    - name: Add all instance public IPs to host group
+      add_host: hostname={{ item.public_ip }} groups=ec2hosts
+      with_items: "{{ec2.instances}}"
+
+    - name: Wait for SSH Server to start responding
+      wait_for:
+              port: 22
+              host: "{{item.public_ip}}"
+              state: started
+      with_items: "{{ec2.instances}}"
+
+- hosts: tag_Deploy_New, ec2hosts
+  tasks:
+  - name: upgrade all packages
+    yum: name=* state=latest
+    become: true
+  
+  - name: Ensure git is installed
+    yum: name=git state=latest
+    become: true
+
+  - name: Checkout Webserver Project
+    git:
+       repo: https://github.com/VPPCourse/fleetman-webapp
+       dest: /home/ec2-user/webapp/
+       version: master
+
+  - name: Prepare Maven Directory
+    file:
+       path: /opt
+       state: directory
+    become: true
+
+  - name: Download Maven
+    get_url:
+       url: https://www.apache.org/dist/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
+       dest: /opt/maven3.tar.gz
+    become: true
+
+  - name: Unpack Maven
+    unarchive:
+       remote_src: yes
+       src: /opt/maven3.tar.gz
+       dest: /opt/
+    become: true
+
+  - name: Set Mvn command
+    alternatives:
+       name: mvn
+       path: /opt/apache-maven-3.3.9/bin/mvn
+       link: /usr/bin/mvn
+    become: true
+
+  - name: Install JDK
+    yum:
+       name: java-1.8.0-openjdk-devel
+       state: latest
+    become: true
+
+  - name: Use Java8 for Runtime Java
+    alternatives:
+       name: java
+       path: /usr/lib/jvm/jre-1.8.0-openjdk.x86_64/bin/java
+       link: /usr/bin/java
+    become: true
+
+  - name: Build the Webapp
+    command: mvn -DskipTests package
+    args:
+            chdir: webapp/
+            creates: /home/ec2-user/webapp/target/fleetman-0.0.1-SNAPSHOT.war
+
+  - name: Build a link to the executable so it becomes a service
+    file:
+            src: /home/ec2-user/webapp/target/fleetman-0.0.1-SNAPSHOT.war
+            dest: /etc/init.d/webapp
+            state: link
+    become: true
+
+  - name: Install Config Server as a startup service
+    service:
+            name: webapp
+            state: started
+            enabled: yes
+    become: true
+
+  - name: Wait for the new webserver to begin responding
+    wait_for:
+            host: localhost
+            port: 8080
+            state: started
+
