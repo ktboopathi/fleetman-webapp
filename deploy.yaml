@@ -80,6 +80,7 @@
     copy: 
        src: target/fleetman-0.0.1-SNAPSHOT.war
        dest: /home/ec2-user/webapp/target/
+       mode: 0700
 
   - name: Build a link to the executable so it becomes a service
     file:
