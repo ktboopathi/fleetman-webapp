@@ -1,6 +1,8 @@
 package com.virtualpairprogrammers.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
@@ -20,14 +22,15 @@ public class PositionTrackingExternalService
 	@HystrixCommand(fallbackMethod="handleExternalServiceDown")
 	public Position getLatestPositionForVehicleFromRemoteMicroservice(String name)
 	{
-		Position response = remoteService.getLatestPositionForVehicle(name);
-		if (response == null)
+		ResponseEntity<Position> response = remoteService.getLatestPositionForVehicle(name);
+		if (response.getStatusCode() == HttpStatus.NOT_FOUND)
 		{
 			// no data for this vehicle
 			return null;
 		}
-		response.setUpToDate(true);
-		return response;
+		Position position = response.getBody();
+		position.setUpToDate(true);
+		return position;
 	}
 	
 	
