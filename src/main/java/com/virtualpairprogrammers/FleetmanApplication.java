@@ -16,6 +16,7 @@ import com.netflix.appinfo.AmazonInfo;
 @EnableCircuitBreaker
 @EnableDiscoveryClient
 @EnableFeignClients
+@EnableHystrixDashboard
 public class FleetmanApplication {
 
 	public static void main(String[] args) {
