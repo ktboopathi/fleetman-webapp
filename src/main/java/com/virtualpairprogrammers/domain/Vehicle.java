@@ -24,9 +24,6 @@ public class Vehicle {
 	private String currentDriver;
 	private String chassisNumber;
 	
-	@Version
-	private int version;
-	
 	public Vehicle() {}
 	
 	public long getId() {

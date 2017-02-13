@@ -58,7 +58,7 @@ public class VehicleController
 	  
 	@RequestMapping(value="/vehicle/{name}")
 	@Transactional
-	public ModelAndView showVehicleByName(@PathVariable("name") String name)
+	public synchronized ModelAndView showVehicleByName(@PathVariable("name") String name)
 	{
 		Vehicle vehicle = data.findByName(name);
 		if (vehicle == null)
