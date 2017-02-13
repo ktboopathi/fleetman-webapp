@@ -10,6 +10,7 @@ import org.springframework.cloud.netflix.eureka.EurekaInstanceConfigBean;
 import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.cloud.netflix.hystrix.dashboard.EnableHystrixDashboard;
 import org.springframework.context.annotation.Bean;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.netflix.appinfo.AmazonInfo;
 
@@ -18,6 +19,7 @@ import com.netflix.appinfo.AmazonInfo;
 @EnableDiscoveryClient
 @EnableFeignClients
 @EnableHystrixDashboard
+@EnableTransactionManagement
 public class FleetmanApplication {
 
 	public static void main(String[] args) {
