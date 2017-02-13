@@ -70,6 +70,13 @@ public class VehicleController
 		
 		// get the current position for this vehicle from the microservice
 		Position latestPosition = externalService.getLatestPositionForVehicleFromRemoteMicroservice(name);
+
+		
+		// TODO IF no reports?
+		if (latestPosition == null)
+		{
+			return new ModelAndView("noReports", "name",name);
+		}
 		
 		// If successful, then update in our database.
 		if (latestPosition.isUpToDate())

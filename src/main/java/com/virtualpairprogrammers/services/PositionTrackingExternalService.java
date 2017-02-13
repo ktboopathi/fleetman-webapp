@@ -21,6 +21,11 @@ public class PositionTrackingExternalService
 	public Position getLatestPositionForVehicleFromRemoteMicroservice(String name)
 	{
 		Position response = remoteService.getLatestPositionForVehicle(name);
+		if (response == null)
+		{
+			// no data for this vehicle
+			return null;
+		}
 		response.setUpToDate(true);
 		return response;
 	}
