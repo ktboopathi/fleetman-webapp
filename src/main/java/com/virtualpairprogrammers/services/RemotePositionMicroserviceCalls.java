@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.virtualpairprogrammers.controllers.Position;
 
-@FeignClient(name="fleetman-position-tracker")
+@FeignClient(name="fleetman-position-tracker", decode404=true)
 public interface RemotePositionMicroserviceCalls 
 {
 	// REST Call
