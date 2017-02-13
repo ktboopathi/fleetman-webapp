@@ -61,6 +61,13 @@ public class VehicleController
 	{
 		Vehicle vehicle = data.findByName(name);
 		
+		// If this vehicle doesn't exist, create it! Duh!
+		if (vehicle == null)
+		{
+			vehicle = new Vehicle(name);
+			data.save(vehicle);
+		}
+		
 		// get the current position for this vehicle from the microservice
 		Position latestPosition = externalService.getLatestPositionForVehicleFromRemoteMicroservice(name);
 		
