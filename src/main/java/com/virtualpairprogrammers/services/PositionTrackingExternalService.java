@@ -22,15 +22,9 @@ public class PositionTrackingExternalService
 	@HystrixCommand(fallbackMethod="handleExternalServiceDown")
 	public Position getLatestPositionForVehicleFromRemoteMicroservice(String name)
 	{
-		ResponseEntity<Position> response = remoteService.getLatestPositionForVehicle(name);
-		if (response.getStatusCode() == HttpStatus.NOT_FOUND)
-		{
-			// no data for this vehicle
-			return null;
-		}
-		Position position = response.getBody();
-		position.setUpToDate(true);
-		return position;
+		Position response = remoteService.getLatestPositionForVehicle(name);
+		response.setUpToDate(true);
+		return response;
 	}
 	
 	
