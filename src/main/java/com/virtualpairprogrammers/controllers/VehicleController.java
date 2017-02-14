@@ -61,11 +61,6 @@ public class VehicleController
 	public synchronized ModelAndView showVehicleByName(@PathVariable("name") String name)
 	{
 		Vehicle vehicle = data.findByName(name);
-		if (vehicle == null)
-		{
-			vehicle = new Vehicle(name);
-			data.save(vehicle);
-		}
 		
 		// get the current position for this vehicle from the microservice
 		Position latestPosition = externalService.getLatestPositionForVehicleFromRemoteMicroservice(name);
