@@ -10,7 +10,6 @@
      live_ip_address: 18.206.143.206 # for blue/green deployment
   
   tasks:
-    
     - name: Setup variables for visibility across all hosts defined in this playbook
       set_fact:
           region: "{{ region }}"
@@ -111,43 +110,42 @@
             state: started
             
 # Series of steps to implement a Green -> Blue switchover
-
 - hosts: localhost
   tasks:
-  - name: Gather facts about the new blue server
-    ec2_remote_facts:
+   - name: Gather facts about the new blue server
+     ec2_remote_facts:
        filters:
           "tag:Deploy": Blue
           "tag:Name": Webserver
           instance-state-name: running
        region: "{{ region }}"
-    register: new_server ## register new ip address to this variable
+     register: new_server ## register new ip address to this variable
 
-  - name: Get the id of the old, soon to be dead, green server
-    ec2_remote_facts:
+   - name: Get the id of the old, soon to be dead, green server
+     ec2_remote_facts:
        filters:
           "tag:Deploy": Green
           "tag:Name": Webserver
           instance-state-name: running
        region: "{{ region }}"
-    register: old_green
+     register: old_green
 
-  - name: Deallocate the EIP
-    ec2_eip:
+   - name: Deallocate the EIP
+     ec2_eip:
        device_id: "{{ old_green.instances[0].id }}"
        ip: "{{ live_ip_address }}"
        state: absent
        region: "{{ region }}"
-    when: old_green.instances[0].id is defined # run this task only if there is a green instance running
+     when: old_green.instances[0].id is defined # run this task only if there is a green instance running
 
-  - name: Allocate the EIP to the new instance
+   - name: Allocate the EIP to the new instance
     ec2_eip:
       device_id: "{{ new_server.instances[0].id }}"
       ip: "{{ live_ip_address }}"
       region: "{{ region }}"
 
-  - name: Terminate the existing Green Server.
-    ec2:
+   - name: Terminate the existing Green Server.
+     ec2:
       exact_count: 0
       count_tag:
         Deploy: Green
@@ -155,16 +153,16 @@
       region: "{{ region }}"
       image: notneeded
 
-  - name: All done, set new server to Green status
-    ec2_tag:
+   - name: All done, set new server to Green status
+     ec2_tag:
        region: "{{ region }}"
        resource: "{{ new_server.instances[0].id }}"
        tags:
           Deploy: Green
        state: present
 
-  - name: Remove Blue Tag
-    ec2_tag:
+   - name: Remove Blue Tag
+     ec2_tag:
        region: "{{ region }}"
        resource: "{{ new_server.instances[0].id }}"
        tags:
