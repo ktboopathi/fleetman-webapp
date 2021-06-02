@@ -126,7 +126,7 @@
      debug: msg="new_server ip is {{ new_server }}" 
      
    - name: output the new_server instances variable 
-     debug: msg="new_server ip is {{ new_server.instances[0].id }}" 
+     debug: msg="new_server ip is {{ new_server.instances[0].instance_id }}" 
 
    - name: Get the id of the old, soon to be dead, green server
      ec2_instance_facts:
@@ -139,15 +139,15 @@
 
    - name: Deallocate the EIP
      ec2_eip:
-       device_id: "{{ old_green.instances[0].id }}"
+       device_id: "{{ old_green.instances[0].instance_id }}"
        ip: "{{ live_ip_address }}"
        state: absent
        region: "{{ region }}"
-     when: old_green.instances[0].id is defined # run this task only if there is a green instance running
+     when: old_green.instances[0].instance_id is defined # run this task only if there is a green instance running
 
    - name: Allocate the EIP to the new instance
      ec2_eip:
-      device_id: "{{ new_server.instances[0].id }}"
+      device_id: "{{ new_server.instances[0].instance_id }}"
       ip: "{{ live_ip_address }}"
       region: "{{ region }}"
 
@@ -163,7 +163,7 @@
    - name: All done, set new server to Green status
      ec2_tag:
        region: "{{ region }}"
-       resource: "{{ new_server.instances[0].id }}"
+       resource: "{{ new_server.instances[0].instance_id }}"
        tags:
           Deploy: Green
        state: present
@@ -171,8 +171,7 @@
    - name: Remove Blue Tag
      ec2_tag:
        region: "{{ region }}"
-       resource: "{{ new_server.instances[0].id }}"
+       resource: "{{ new_server.instances[0].instance_id }}"
        tags:
           Deploy: Blue
        state: absent
-
