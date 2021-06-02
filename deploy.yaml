@@ -122,7 +122,7 @@
      register: new_server ## register new ip address to this variable
      
    - name: output the new_server variable
-     debug: msg="new_server ip is {{ new_server.instances[0].id }}" 
+     debug: msg="new_server ip is {{ new_server}}" 
 
    - name: Get the id of the old, soon to be dead, green server
      ec2_instance_facts:
@@ -171,3 +171,4 @@
        tags:
           Deploy: Blue
        state: absent
+
