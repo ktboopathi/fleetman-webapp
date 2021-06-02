@@ -139,7 +139,7 @@
      when: old_green.instances[0].id is defined # run this task only if there is a green instance running
 
    - name: Allocate the EIP to the new instance
-    ec2_eip:
+     ec2_eip:
       device_id: "{{ new_server.instances[0].id }}"
       ip: "{{ live_ip_address }}"
       region: "{{ region }}"
