@@ -7,7 +7,7 @@
      keypair_name: kops-microservices-demo
      instance_type: t2.nano
      image_name: ami-0d5eff06f840b45e9
-     live_ip_address: 3.211.156.118 # for blue/green deployment
+     live_ip_address: 18.210.242.178 # for blue/green deployment
   
   tasks:
     - name: Setup variables for visibility across all hosts defined in this playbook
